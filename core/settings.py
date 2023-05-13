@@ -24,8 +24,12 @@ SECRET_KEY = 'django-insecure-7l)!te6&dzl$^6&dsa#qm-b5im#nd1c9x7&26m+w7vdie3kn!u
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+ON_SERVER = False
 
-ALLOWED_HOSTS = ["voter.seritrex.xyz"]
+if ON_SERVER:
+    ALLOWED_HOSTS = ["voter.seritrex.xyz"]
+else:
+    ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -37,10 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "users",
-    "voter",
-    "election"
+    "users.apps.UsersConfig",
+    "voter.apps.VoterConfig",
+    "election.apps.ElectionConfig",
+    "widget_tweaks"
 ]
+
+AUTH_USER_MODEL = "users.CustomUser"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -57,7 +64,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates", ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,16 +83,25 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': "seritrex_dj",
-        "USER": "seritrex_dj_user",
-        "PASSWORD": "Deku@2020",
-        "HOST": "localhost",
-        "PORT": "3306"
+if ON_SERVER:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': "seritrex_dj",
+            "USER": "seritrex_dj_user",
+            "PASSWORD": "Deku@2020",
+            "HOST": "localhost",
+            "PORT": "3306"
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / "app.sqlite",
+        }
+    }
+
 
 
 # Password validation
@@ -122,11 +138,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = "/home3/seritrex/voter/static"
+if ON_SERVER:
+    STATIC_URL = 'static/'
+    STATIC_ROOT = "/home3/seritrex/voter/static"
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = "/home3/seritrex/voter/media"
+    MEDIA_URL = 'media/'
+    MEDIA_ROOT = "/home3/seritrex/voter/media"
+else:
+    STATIC_URL = 'static/'
+    STATIC_ROOT = BASE_DIR / "static"
+
+    MEDIA_URL = 'media/'
+    MEDIA_ROOT = BASE_DIR / "media"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
